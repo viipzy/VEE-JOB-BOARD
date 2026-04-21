@@ -1,30 +1,69 @@
-import { Outlet, Navigate } from "react-router-dom";
-import { useSelector } from "react-redux";
-import Header from "./Header";
+import { Outlet } from "react-router-dom";
 import Sidebar from "./Sidebar";
+import { Bell, User } from "lucide-react";
 
-const DashboardLayout = ({ allowedRole }) => {
-  const { isAuthenticated, user } = useSelector((state) => state.auth);
-
-  // Security Check 1: Is the user logged in?
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
-  }
-
-  // Security Check 2: Does the user have the right role for this dashboard?
-  if (allowedRole && user?.role !== allowedRole) {
-    return <Navigate to="/" replace />;
-  }
-
+const DashboardLayout = ({ role = "candidate" }) => {
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col">
-      <Header />
-      <div className="flex flex-1 max-w-[1600px] w-full mx-auto">
-        {/* The persistent side navigation */}
-        <Sidebar />
+    <div className="dashboard-wrapper">
+      {/* Persistent Navigation */}
+      <Sidebar role={role} />
 
-        {/* The dynamic workspace area */}
-        <main className="flex-1 p-6 md:p-10 overflow-y-auto">
+      {/* Main Workspace */}
+      <div className="dashboard-main">
+        {/* Workspace Topbar */}
+        <header className="dashboard-topbar">
+          <h2
+            style={{ fontSize: "1.25rem", fontWeight: "700", color: "#0f172a" }}
+          >
+            {role === "candidate" ? "Candidate Portal" : "Employer Portal"}
+          </h2>
+
+          <div style={{ display: "flex", alignItems: "center", gap: "1.5rem" }}>
+            <button
+              style={{
+                background: "none",
+                color: "#64748b",
+                cursor: "pointer",
+              }}
+            >
+              <Bell size={20} />
+            </button>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "0.75rem",
+                cursor: "pointer",
+              }}
+            >
+              <div
+                style={{
+                  width: "36px",
+                  height: "36px",
+                  borderRadius: "50%",
+                  backgroundColor: "#e2e8f0",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <User size={18} color="#64748b" />
+              </div>
+              <span
+                style={{
+                  fontSize: "0.9rem",
+                  fontWeight: "600",
+                  color: "#0f172a",
+                }}
+              >
+                User Account
+              </span>
+            </div>
+          </div>
+        </header>
+
+        {/* Dynamic Content Injection Point */}
+        <main className="dashboard-content">
           <Outlet />
         </main>
       </div>

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate, Link } from "react-router-dom";
 import { Briefcase, Mail, Lock, User, ArrowRight } from "lucide-react";
-// import { loginSuccess } from '../../store/authSlice';
+import { loginSuccess } from '../../store/authSlice';
 
 const Register = () => {
   const [role, setRole] = useState("candidate");
