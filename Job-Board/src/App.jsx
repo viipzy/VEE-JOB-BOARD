@@ -1,52 +1,48 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import MainLayout from "./components/layout/MainLayout.jsx";
-import DashboardLayout from "./components/layout/DashboardLayout";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
-// Public Pages
+// Layouts
+import MainLayout from "./components/layout/MainLayout.jsx";
+import DashboardLayout from "./components/layout/DashboardLayout.jsx";
+
 // Public Pages
 import Home from "./pages/public/Home.jsx";
 import JobListings from "./pages/public/JobListings.jsx";
-import JobDetails from "./pages/public/JobDetails.jsx";
-import Companies from "./pages/public/Companies.jsx"; 
+import Companies from "./pages/public/Companies.jsx";
 import Login from "./pages/public/Login.jsx";
 import Register from "./pages/public/Register.jsx";
 
-// Protected Pages
-import DashboardOverview from "./pages/candidate/DashboardOverview";
+// (Assume your dashboard imports are here)
+import DashboardOverview from "./pages/candidate/DashboardOverview.jsx";
 
-const App = () => {
+function App() {
   return (
-    <BrowserRouter>
+    <Router>
       <Routes>
-        {/* Public Marketing & Discovery Routes */}
-        <Route path="/" element={<MainLayout />}>
-          <Route index element={<Home />} />
-          <Route path="jobs" element={<JobListings />} />
-          <Route path="jobs/:id" element={<JobDetails />} />
-          <Route path="/companies" element={<Companies />} />{" "}
-          {}
+        {/* --- 1. Public Website (Header + Footer) --- */}
+        <Route element={<MainLayout />}>
+          <Route path="/" element={<Home />} />
+          <Route path="/jobs" element={<JobListings />} />
+          <Route path="/companies" element={<Companies />} />
+          {/* If you have an About or Contact page later, they go here too! */}
         </Route>
-        {/* Unprotected Auth Routes */}
+
+        {/* --- 2. Standalone Auth Pages (No Header/Footer) --- */}
         <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} /> {}
-        {/* Protected Candidate Dashboard */}
-        <Route
-          path="/candidate"
-          element={<DashboardLayout allowedRole="candidate" />}
-        >
+        <Route path="/register" element={<Register />} />
+
+        {/* --- 3. Protected Dashboard (Sidebar + Topbar) --- */}
+        <Route path="/candidate" element={<DashboardLayout role="candidate" />}>
           <Route path="dashboard" element={<DashboardOverview />} />
-          {/* Future routes: applications, saved, resume, settings */}
+          {/* Other candidate routes... */}
         </Route>
-        {/* Protected Employer Dashboard */}
-        <Route
-          path="/employer"
-          element={<DashboardLayout allowedRole="employer" />}
-        >
-          {/* Future routes: dashboard, post-job, manage-jobs, applicants */}
+
+        <Route path="/employer" element={<DashboardLayout role="employer" />}>
+          <Route path="dashboard" element={<DashboardOverview />} />
+          {/* Other employer routes... */}
         </Route>
       </Routes>
-    </BrowserRouter>
+    </Router>
   );
-};
+}
 
 export default App;

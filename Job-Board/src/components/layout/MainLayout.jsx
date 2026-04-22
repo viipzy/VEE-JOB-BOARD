@@ -1,14 +1,23 @@
 import { Outlet } from "react-router-dom";
 import Header from "./Header";
+import Footer from "./Footer";
 
 const MainLayout = () => {
   return (
-    <div className="min-h-screen bg-background font-sans text-slate-900 flex flex-col">
+    <div
+      className="app-container"
+      style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}
+    >
+      {/* 1. The Global Header */}
       <Header />
-      {/* The Outlet is where the current page content gets injected */}
-      <main className="flex-1">
+
+      {/* 2. The Dynamic Page Content */}
+      <main style={{ flex: 1 }}>
         <Outlet />
       </main>
+
+      {/* 3. The Global Footer */}
+      <Footer />
     </div>
   );
 };
