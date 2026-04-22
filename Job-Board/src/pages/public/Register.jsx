@@ -2,52 +2,135 @@ import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate, Link } from "react-router-dom";
 import { Briefcase, Mail, Lock, User, ArrowRight } from "lucide-react";
-import { loginSuccess } from '../../store/authSlice';
+import { loginSuccess } from "../../store/authSlice";
+
+// --- FIREBASE IMPORTS ---
+import {
+  createUserWithEmailAndPassword,
+  updateProfile,
+  signInWithPopup,
+  GoogleAuthProvider,
+} from "firebase/auth";
+import { doc, setDoc, getDoc } from "firebase/firestore";
+import { auth, db } from "../../firebase/config";
 
 const Register = () => {
   const [role, setRole] = useState("candidate");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const handleRegister = (e) => {
+  // --- PROTOCOL 1: MANUAL REGISTRATION (Email & Password) ---
+  const handleRegister = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setError("");
 
-    // Simulate API registration payload
-    const userPayload = {
-      id: Math.random().toString(36).substr(2, 9),
-      name: name,
-      email: email,
-      role: role,
-    };
+    try {
+      // 1. Create the user credential in Firebase Authentication
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password,
+      );
+      const user = userCredential.user;
 
-    // dispatch(loginSuccess(userPayload)); // Auto-login after registration
-    console.log("Registered as:", userPayload);
+      // 2. Attach the user's full name to their authentication profile
+      await updateProfile(user, { displayName: name });
 
-    // Route to appropriate dashboard
-    if (role === "employer") {
-      navigate("/employer/dashboard");
-    } else {
-      navigate("/candidate/dashboard");
+      // 3. Construct the database record
+      await setDoc(doc(db, "users", user.uid), {
+        uid: user.uid,
+        name: name,
+        email: email,
+        role: role,
+        createdAt: new Date().toISOString(),
+      });
+
+      // 4. Issue the local security clearance (Redux)
+      dispatch(
+        loginSuccess({
+          id: user.uid,
+          name: name,
+          email: email,
+          role: role,
+        }),
+      );
+
+      // 5. Route to the appropriate sector
+      navigate(`/${role}/dashboard`);
+    } catch (err) {
+      console.error("Registration Error:", err);
+      // Simplify the error message for the user interface
+      if (err.code === "auth/email-already-in-use") {
+        setError("This email is already registered. Please log in.");
+      } else {
+        setError(err.message);
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleSocialSignup = (provider) => {
-    console.log(`Initiating ${provider} sign up for ${role}...`);
+  // --- PROTOCOL 2: EXPRESS REGISTRATION (Google Auth) ---
+  const handleGoogleSignup = async () => {
+    setLoading(true);
+    setError("");
+
+    try {
+      const provider = new GoogleAuthProvider();
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+
+      const docRef = doc(db, "users", user.uid);
+      const docSnap = await getDoc(docRef);
+
+      let finalRole = role;
+
+      // Critical Check: Prevent overwriting an existing user's role
+      if (!docSnap.exists()) {
+        await setDoc(docRef, {
+          uid: user.uid,
+          name: user.displayName,
+          email: user.email,
+          role: role, // Assign the role currently selected on the UI toggle
+          createdAt: new Date().toISOString(),
+        });
+      } else {
+        finalRole = docSnap.data().role;
+      }
+
+      dispatch(
+        loginSuccess({
+          id: user.uid,
+          name: user.displayName,
+          email: user.email,
+          role: finalRole,
+        }),
+      );
+
+      navigate(`/${finalRole}/dashboard`);
+    } catch (err) {
+      console.error("Google Signup Error:", err);
+      setError("Failed to register with Google.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="auth-container">
-      {/* Left side: Functional Form */}
       <div className="auth-form-side">
         <div className="auth-form-wrapper">
           <Link
             to="/"
             className="brand-logo"
-            style={{ marginBottom: "2.5rem" }}
+            style={{ marginBottom: "1.5rem" }}
           >
             <div className="brand-icon">V</div>
             <span>Vee.</span>
@@ -59,7 +142,6 @@ const Register = () => {
             {role === "candidate" ? "professionals" : "companies"} today.
           </p>
 
-          {/* Role Toggle */}
           <div className="role-toggle">
             <button
               type="button"
@@ -77,16 +159,40 @@ const Register = () => {
             </button>
           </div>
 
-          {/* Social Sign Up Buttons */}
-          <div className="social-login-group">
+          {/* Diagnostic Display Area */}
+          {error && (
+            <div
+              style={{
+                padding: "0.75rem",
+                backgroundColor: "#fef2f2",
+                color: "#dc2626",
+                borderRadius: "8px",
+                fontSize: "0.85rem",
+                marginBottom: "1rem",
+                border: "1px solid #fecaca",
+              }}
+            >
+              {error}
+            </div>
+          )}
+
+          {/* Full-Width Google Intake Portal */}
+          <div style={{ marginBottom: "1rem" }}>
             <button
               type="button"
-              onClick={() => handleSocialSignup("Google")}
+              onClick={handleGoogleSignup}
+              disabled={loading}
               className="social-btn"
+              style={{
+                width: "100%",
+                padding: "0.85rem",
+                display: "flex",
+                justifyContent: "center",
+              }}
             >
               <svg
-                width="20"
-                height="20"
+                width="18"
+                height="18"
                 viewBox="0 0 24 24"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
@@ -108,38 +214,19 @@ const Register = () => {
                   fill="#EA4335"
                 />
               </svg>
-              Google
-            </button>
-
-            <button
-              type="button"
-              onClick={() => handleSocialSignup("LinkedIn")}
-              className="social-btn"
-            >
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"
-                  fill="#0A66C2"
-                />
-              </svg>
-              LinkedIn
+              Sign up with Google
             </button>
           </div>
 
           <div className="auth-divider">or register with email</div>
 
+          {/* Manual Intake Form */}
           <form onSubmit={handleRegister}>
             <div className="form-group">
               <label className="form-label">Full Name</label>
               <div className="input-wrapper">
                 <div className="input-icon">
-                  <User size={18} />
+                  <User size={16} />
                 </div>
                 <input
                   type="text"
@@ -156,7 +243,7 @@ const Register = () => {
               <label className="form-label">Email</label>
               <div className="input-wrapper">
                 <div className="input-icon">
-                  <Mail size={18} />
+                  <Mail size={16} />
                 </div>
                 <input
                   type="email"
@@ -173,7 +260,7 @@ const Register = () => {
               <label className="form-label">Password</label>
               <div className="input-wrapper">
                 <div className="input-icon">
-                  <Lock size={18} />
+                  <Lock size={16} />
                 </div>
                 <input
                   type="password"
@@ -181,7 +268,7 @@ const Register = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="premium-input"
-                  placeholder="Create a password (min. 8 characters)"
+                  placeholder="Create a password"
                   minLength={8}
                 />
               </div>
@@ -189,9 +276,9 @@ const Register = () => {
 
             <p
               style={{
-                fontSize: "0.8rem",
+                fontSize: "0.75rem",
                 color: "#64748b",
-                marginBottom: "1.5rem",
+                marginBottom: "1.25rem",
                 lineHeight: "1.5",
               }}
             >
@@ -208,18 +295,24 @@ const Register = () => {
 
             <button
               type="submit"
+              disabled={loading}
               className="btn-primary"
-              style={{ width: "100%", padding: "0.85rem" }}
+              style={{
+                width: "100%",
+                padding: "0.75rem",
+                opacity: loading ? 0.7 : 1,
+              }}
             >
-              Create Account <ArrowRight size={18} />
+              {loading ? "Processing..." : "Create Account"}{" "}
+              <ArrowRight size={16} />
             </button>
           </form>
 
           <p
             style={{
-              marginTop: "2rem",
+              marginTop: "1.5rem",
               textAlign: "center",
-              fontSize: "0.9rem",
+              fontSize: "0.85rem",
               color: "#64748b",
             }}
           >
@@ -231,40 +324,34 @@ const Register = () => {
         </div>
       </div>
 
-      {/* Right side: Branded Visual */}
       <div className="auth-visual-side">
         <div className="auth-visual-glow"></div>
-
         <div className="auth-glass-card">
           <div
             style={{
-              width: "56px",
-              height: "56px",
+              width: "48px",
+              height: "48px",
               backgroundColor: "#3b82f6",
               borderRadius: "12px",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              marginBottom: "1.5rem",
+              marginBottom: "1.25rem",
             }}
           >
-            <Briefcase size={28} color="white" />
+            <Briefcase size={24} color="white" />
           </div>
-
           <h2
             style={{
-              fontSize: "2rem",
+              fontSize: "1.75rem",
               fontWeight: "800",
-              marginBottom: "1rem",
+              marginBottom: "0.75rem",
               lineHeight: "1.2",
             }}
           >
             Start your journey with Vee.
           </h2>
-
-          <p
-            style={{ fontSize: "1.1rem", color: "#e0e7ff", lineHeight: "1.6" }}
-          >
+          <p style={{ fontSize: "1rem", color: "#e0e7ff", lineHeight: "1.5" }}>
             {role === "candidate"
               ? "Create your profile once, and apply to thousands of curated opportunities with a single click."
               : "Build your employer brand, post jobs, and connect with the top 1% of vetted talent globally."}
