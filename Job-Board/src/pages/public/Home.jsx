@@ -1,4 +1,5 @@
 import { Search, MapPin } from "lucide-react";
+import { Link } from "react-router-dom";
 import JobCard from "../../components/jobs/JobCard.jsx";
 
 const mockJobs = [
@@ -87,9 +88,10 @@ const Home = () => {
                 Hand-picked jobs from top companies.
               </p>
             </div>
-            <a href="#" className="link-primary">
+            {/* Replaced static anchor tag with dynamic Link component */}
+            <Link to="/jobs" className="link-primary">
               View all jobs &rarr;
-            </a>
+            </Link>
           </div>
 
           <div className="job-grid">

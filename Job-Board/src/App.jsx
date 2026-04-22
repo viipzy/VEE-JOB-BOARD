@@ -3,11 +3,13 @@ import MainLayout from "./components/layout/MainLayout.jsx";
 import DashboardLayout from "./components/layout/DashboardLayout";
 
 // Public Pages
+// Public Pages
 import Home from "./pages/public/Home.jsx";
 import JobListings from "./pages/public/JobListings.jsx";
 import JobDetails from "./pages/public/JobDetails.jsx";
+import Companies from "./pages/public/Companies.jsx"; 
 import Login from "./pages/public/Login.jsx";
-import Register from "./pages/public/Register.jsx"; // Add this line
+import Register from "./pages/public/Register.jsx";
 
 // Protected Pages
 import DashboardOverview from "./pages/candidate/DashboardOverview";
@@ -21,6 +23,8 @@ const App = () => {
           <Route index element={<Home />} />
           <Route path="jobs" element={<JobListings />} />
           <Route path="jobs/:id" element={<JobDetails />} />
+          <Route path="/companies" element={<Companies />} />{" "}
+          {}
         </Route>
         {/* Unprotected Auth Routes */}
         <Route path="/login" element={<Login />} />

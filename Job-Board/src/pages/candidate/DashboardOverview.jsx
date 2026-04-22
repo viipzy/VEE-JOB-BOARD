@@ -1,8 +1,8 @@
 import { Briefcase, Bookmark, FileText, ArrowRight } from "lucide-react";
 import { useSelector } from "react-redux";
+import { Link } from "react-router-dom";
 
 const DashboardOverview = () => {
-  // Retrieve user data from Redux, provide fallback for development
   const authState = useSelector((state) => state.auth) || { user: null };
   const userName = authState.user?.name || "James";
 
@@ -60,8 +60,9 @@ const DashboardOverview = () => {
       <div className="dashboard-section">
         <div className="section-header-row">
           <h3>Recent Applications</h3>
-          <a
-            href="#"
+          {/* Replaced static anchor tag with dynamic Link component */}
+          <Link
+            to="/jobs"
             style={{
               fontSize: "0.85rem",
               fontWeight: "600",
@@ -71,8 +72,8 @@ const DashboardOverview = () => {
               gap: "4px",
             }}
           >
-            View All <ArrowRight size={14} />
-          </a>
+            View All Jobs <ArrowRight size={14} />
+          </Link>
         </div>
 
         <div className="data-table-wrapper">

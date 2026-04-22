@@ -6,13 +6,15 @@ import {
   Settings,
   LogOut,
   Briefcase,
+  Home,
 } from "lucide-react";
 
 const Sidebar = ({ role = "candidate" }) => {
-  // Define navigational links based on user type
+  // Define navigational links based on user type, now including a universal Home node
   const links =
     role === "candidate"
       ? [
+          { name: "Home", path: "/", icon: Home },
           {
             name: "Overview",
             path: "/candidate/dashboard",
@@ -31,6 +33,7 @@ const Sidebar = ({ role = "candidate" }) => {
           },
         ]
       : [
+          { name: "Home", path: "/", icon: Home },
           {
             name: "Overview",
             path: "/employer/dashboard",
@@ -76,7 +79,7 @@ const Sidebar = ({ role = "candidate" }) => {
               key={link.name}
               to={link.path}
               className={({ isActive }) =>
-                isActive ? "nav-item active" : "nav-item"
+                isActive && link.path !== "/" ? "nav-item active" : "nav-item"
               }
             >
               <Icon size={18} />

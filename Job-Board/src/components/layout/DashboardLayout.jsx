@@ -1,8 +1,21 @@
-import { Outlet } from "react-router-dom";
+import { Outlet, Link } from "react-router-dom";
+import { useSelector } from "react-redux";
 import Sidebar from "./Sidebar";
-import { Bell, User } from "lucide-react";
+import { Bell } from "lucide-react";
 
 const DashboardLayout = ({ role = "candidate" }) => {
+  // 1. Intercept the user data from the Redux store
+  const authState = useSelector((state) => state.auth) || { user: null };
+  const user = authState.user;
+
+  // 2. Establish fallback values in case of slow rendering
+  const userName = user?.name || "User Account";
+  const userInitial = userName.charAt(0);
+
+  // 3. Determine the correct routing path based on the user's role
+  const profilePath =
+    role === "employer" ? "/employer/settings" : "/candidate/settings";
+
   return (
     <div className="dashboard-wrapper">
       {/* Persistent Navigation */}
@@ -18,47 +31,24 @@ const DashboardLayout = ({ role = "candidate" }) => {
             {role === "candidate" ? "Candidate Portal" : "Employer Portal"}
           </h2>
 
-          <div style={{ display: "flex", alignItems: "center", gap: "1.5rem" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
             <button
+              className="icon-btn"
               style={{
                 background: "none",
                 color: "#64748b",
                 cursor: "pointer",
+                padding: "0.5rem",
               }}
             >
               <Bell size={20} />
             </button>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "0.75rem",
-                cursor: "pointer",
-              }}
-            >
-              <div
-                style={{
-                  width: "36px",
-                  height: "36px",
-                  borderRadius: "50%",
-                  backgroundColor: "#e2e8f0",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <User size={18} color="#64748b" />
-              </div>
-              <span
-                style={{
-                  fontSize: "0.9rem",
-                  fontWeight: "600",
-                  color: "#0f172a",
-                }}
-              >
-                User Account
-              </span>
-            </div>
+
+            {/* Dynamic Interactive Profile Widget */}
+            <Link to={profilePath} className="profile-pill">
+              <div className="profile-avatar">{userInitial}</div>
+              <span className="profile-name">{userName}</span>
+            </Link>
           </div>
         </header>
 

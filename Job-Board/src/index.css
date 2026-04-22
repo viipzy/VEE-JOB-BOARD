@@ -239,7 +239,7 @@ button { cursor: pointer; border: none; font-family: inherit; }
   padding: 1rem; 
   flex: 1;
   color: #94a3b8; 
-  min-width: 0; /* CRITICAL: Prevents flex container from squishing */
+  min-width: 0; 
 }
 
 @media (min-width: 768px) {
@@ -254,11 +254,11 @@ button { cursor: pointer; border: none; font-family: inherit; }
   font-size: 1rem; 
   width: 100%; 
   color: #0f172a; 
-  min-width: 0; /* CRITICAL: Allows text box to function inside flex */
+  min-width: 0; 
   background: transparent;
 }
 
-/* Ensure the button matches the height of the inputs */
+
 .search-submit-btn {
   width: 100%;
   padding: 1rem 2rem;
@@ -268,12 +268,12 @@ button { cursor: pointer; border: none; font-family: inherit; }
 /* Desktop-specific adjustments */
 @media (min-width: 768px) {
   .search-submit-btn {
-    width: auto; /* Restrains the button on large screens */
-    flex-shrink: 0; /* Prevents the button from being squished */
+    width: auto; 
+    flex-shrink: 0;
   }
   
   .search-box {
-    padding: 0.5rem 0.5rem 0.5rem 0.5rem; /* Balances the internal spacing */
+    padding: 0.5rem 0.5rem 0.5rem 0.5rem; 
   }
 }
 /* Grid Layouts */
@@ -289,7 +289,7 @@ button { cursor: pointer; border: none; font-family: inherit; }
   gap: 1.5rem;
 }
 
-/* --- Find Jobs Section (Library Architecture) --- */
+/* --- Find Jobs Section  --- */
 .find-jobs-wrapper {
   background-color: #f8fafc;
   min-height: 100vh;
@@ -308,7 +308,7 @@ button { cursor: pointer; border: none; font-family: inherit; }
   flex-direction: column;
   gap: 2rem;
   max-width: 1200px;
-  margin: -2.5rem auto 0; /* Pulls the grid up into the blue header */
+  margin: -2.5rem auto 0;
   padding: 0 1.5rem;
   position: relative;
   z-index: 10;
@@ -321,7 +321,7 @@ button { cursor: pointer; border: none; font-family: inherit; }
   }
 }
 
-/* The Index (Filter Panel) */
+/* Filter Panel */
 .filter-panel {
   width: 100%;
   background: white;
@@ -336,7 +336,7 @@ button { cursor: pointer; border: none; font-family: inherit; }
     width: 280px;
     flex-shrink: 0;
     position: sticky;
-    top: 100px; /* Keeps the panel stationary during scrolling */
+    top: 100px; 
   }
 }
 
@@ -668,10 +668,10 @@ button { cursor: pointer; border: none; font-family: inherit; }
 /* Main Content Area */
 .dashboard-main {
   flex: 1;
-  margin-left: 260px; /* Offsets the fixed sidebar */
+  margin-left: 260px;
   display: flex;
   flex-direction: column;
-  min-width: 0; /* Prevents flexbox blowout */
+  min-width: 0; 
 }
 
 .dashboard-topbar {
@@ -700,6 +700,46 @@ button { cursor: pointer; border: none; font-family: inherit; }
   box-shadow: 0 1px 3px rgba(0,0,0,0.02);
 }
 
+/* Interactive Profile Pill */
+.profile-pill {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.25rem 0.75rem 0.25rem 0.25rem;
+  background-color: transparent;
+  border-radius: 100px;
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.profile-pill:hover {
+  background-color: #f8fafc;
+  border-color: #e2e8f0;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+  transform: translateY(-1px);
+}
+
+.profile-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: #2563eb; /* Brand Blue */
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1rem;
+  text-transform: uppercase;
+}
+
+.profile-name {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #0f172a;
+}
 /* --- 10. Dashboard Overview Components --- */
 .dashboard-welcome {
   display: flex;
@@ -841,3 +881,304 @@ button { cursor: pointer; border: none; font-family: inherit; }
 
 .status-review { background-color: #fef3c7; color: #d97706; }
 .status-interview { background-color: #e0e7ff; color: #4338ca; }
+
+/* --- 11. Companies Directory Page --- */
+.companies-header {
+  background-color: #1e3a8a;
+  padding: 4rem 1.5rem 6rem;
+  text-align: center;
+  color: white;
+}
+
+.companies-container {
+  max-width: 1200px;
+  margin: -2.5rem auto 4rem;
+  padding: 0 1.5rem;
+  position: relative;
+  z-index: 10;
+}
+
+.companies-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 1.5rem;
+}
+
+.company-card {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 1.5rem;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.company-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 30px -5px rgba(0, 0, 0, 0.08);
+  border-color: #cbd5e1;
+}
+
+.company-logo-large {
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: #2563eb;
+  background-color: #eff6ff;
+  margin-bottom: 1.25rem;
+}
+
+.company-name {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 0.5rem;
+}
+
+.company-desc {
+  color: #64748b;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+  flex: 1; /* Pushes the footer to the bottom of the card */
+}
+
+.company-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.company-meta-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: #475569;
+  background-color: #f8fafc;
+  padding: 6px 12px;
+  border-radius: 100px;
+  font-weight: 500;
+  border: 1px solid #f1f5f9;
+}
+
+.company-footer {
+  border-top: 1px solid #f1f5f9;
+  padding-top: 1.25rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.open-jobs-badge {
+  color: #059669;
+  background-color: #ecfdf5;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+
+/* --- 12. Premium Application Footer --- */
+.app-footer {
+  background-color: #0f172a; /* Deep Slate 900 */
+  color: #f8fafc;
+  padding-top: 5rem;
+}
+
+.footer-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+/* Integrated Newsletter Banner */
+.footer-newsletter {
+  background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+  border-radius: 20px;
+  padding: 3rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin-bottom: 5rem;
+  box-shadow: 0 20px 40px -10px rgba(37,99,235,0.3);
+}
+
+@media (min-width: 768px) {
+  .footer-newsletter {
+    flex-direction: row;
+    justify-content: space-between;
+    text-align: left;
+    padding: 3rem 4rem;
+  }
+}
+
+.newsletter-form {
+  display: flex;
+  gap: 0.5rem;
+  width: 100%;
+  max-width: 420px;
+  margin-top: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .newsletter-form { margin-top: 0; }
+}
+
+.newsletter-input {
+  flex: 1;
+  padding: 0.85rem 1.5rem;
+  border-radius: 12px;
+  border: none;
+  outline: none;
+  font-size: 0.95rem;
+  color: #0f172a;
+}
+
+.newsletter-btn {
+  background-color: #0f172a;
+  color: white;
+  padding: 0.85rem 1.5rem;
+  border-radius: 12px;
+  font-weight: 600;
+  transition: background 0.2s;
+  white-space: nowrap;
+}
+
+.newsletter-btn:hover { background-color: #1e293b; }
+
+/* 5-Column Grid Layout */
+.footer-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 3rem;
+  margin-bottom: 4rem;
+}
+
+@media (min-width: 640px) {
+  .footer-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (min-width: 1024px) {
+  /* Brand column is wider, followed by 3 link columns, and 1 contact column */
+  .footer-grid { grid-template-columns: 2fr 1fr 1fr 1fr 1.5fr; gap: 2rem; }
+}
+
+/* Brand Section */
+.footer-brand p {
+  color: #94a3b8;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin-top: 1.25rem;
+  margin-bottom: 1.5rem;
+  max-width: 280px;
+}
+
+.footer-socials {
+  display: flex;
+  gap: 1rem;
+}
+
+.footer-social-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #1e293b;
+  color: #f8fafc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.footer-social-btn:hover {
+  background-color: #2563eb;
+  transform: translateY(-3px);
+}
+
+/* Link Columns */
+.footer-heading {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 1.5rem;
+  letter-spacing: 0.02em;
+}
+
+.footer-links {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.footer-link {
+  color: #94a3b8;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+  display: inline-block;
+  width: fit-content;
+}
+
+.footer-link:hover {
+  color: #3b82f6;
+  transform: translateX(4px); /* Subtle horizontal slide */
+}
+
+/* Contact Details */
+.footer-contact-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  color: #94a3b8;
+  font-size: 0.95rem;
+  margin-bottom: 1rem;
+  line-height: 1.5;
+}
+
+/* Footer Bottom Strip */
+.footer-bottom {
+  border-top: 1px solid #1e293b;
+  padding: 2rem 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  text-align: center;
+}
+
+@media (min-width: 768px) {
+  .footer-bottom {
+    flex-direction: row;
+    justify-content: space-between;
+    text-align: left;
+  }
+}
+
+.footer-bottom-text {
+  color: #64748b;
+  font-size: 0.85rem;
+}
+
+.footer-legal-links {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.footer-legal-links a {
+  color: #64748b;
+  font-size: 0.85rem;
+  transition: color 0.2s;
+}
+
+.footer-legal-links a:hover {
+  color: #cbd5e1;
+}
