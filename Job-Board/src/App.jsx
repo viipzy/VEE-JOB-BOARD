@@ -1,51 +1,72 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
-// Layouts & Guards
-import MainLayout from "./components/layout/MainLayout.jsx";
-import DashboardLayout from "./components/layout/DashboardLayout.jsx";
-import ProtectedRoute from "./components/layout/ProtectedRoute.jsx"; // <-- New Import
+// --- LAYOUTS ---
+import MainLayout from "./components/layout/MainLayout";
+import DashboardLayout from "./components/layout/DashboardLayout";
+import ProtectedRoute from "./components/layout/ProtectedRoute";
 
-// Public Pages
-import Home from "./pages/public/Home.jsx";
-import JobListings from "./pages/public/JobListings.jsx";
-import Companies from "./pages/public/Companies.jsx";
-import Login from "./pages/public/Login.jsx";
-import Register from "./pages/public/Register.jsx";
+// --- PUBLIC PAGES ---
+import Home from "./pages/public/Home";
+import Login from "./pages/public/Login";
+import Register from "./pages/public/Register";
+import JobListings from "./pages/public/JobListings";
+import JobDetails from "./pages/public/JobDetails";
+import Companies from "./pages/public/Companies";
 
-// Dashboard Pages
-import DashboardOverview from "./pages/candidate/DashboardOverview.jsx";
+// --- DASHBOARD PAGES ---
+// Using the dynamic overview component we updated earlier
+import DashboardOverview from "./pages/candidate/DashboardOverview";
+
+// --- EMPLOYER SPECIFIC PAGES ---
+import PostJob from "./pages/employer/PostJob";
 
 function App() {
   return (
     <Router>
       <Routes>
-        {/* --- 1. Public Website --- */}
+        {/* =========================================
+            PUBLIC ROUTES (Standard Header/Footer)
+        ========================================= */}
         <Route element={<MainLayout />}>
           <Route path="/" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
           <Route path="/jobs" element={<JobListings />} />
+          <Route path="/jobs/:id" element={<JobDetails />} />
           <Route path="/companies" element={<Companies />} />
         </Route>
 
-        {/* --- 2. Standalone Auth Pages --- */}
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-
-        {/* --- 3. Protected CANDIDATE Routes --- */}
+        {/* =========================================
+            PROTECTED CANDIDATE ROUTES
+        ========================================= */}
         <Route element={<ProtectedRoute allowedRole="candidate" />}>
           <Route
             path="/candidate"
             element={<DashboardLayout role="candidate" />}
           >
+            {/* The URL /candidate/dashboard loads the dynamic overview */}
             <Route path="dashboard" element={<DashboardOverview />} />
-            {/* Future Candidate routes will go here: /saved, /applications, /settings */}
+
+            {/* Future Candidate Routes will go here */}
+            {/* <Route path="saved-jobs" element={<SavedJobs />} /> */}
+            {/* <Route path="profile" element={<CandidateProfile />} /> */}
           </Route>
         </Route>
 
-        {/* --- 4. Protected EMPLOYER Routes --- */}
+        {/* =========================================
+            PROTECTED EMPLOYER ROUTES
+        ========================================= */}
         <Route element={<ProtectedRoute allowedRole="employer" />}>
           <Route path="/employer" element={<DashboardLayout role="employer" />}>
+            {/* The URL /employer/dashboard loads the dynamic overview */}
             <Route path="dashboard" element={<DashboardOverview />} />
-            {/* Future Employer routes will go here: /jobs, /applicants, /settings */}
+
+            {/* THE NEW ROUTE: Connects the "Post New Job" button to the form */}
+            <Route path="post-job" element={<PostJob />} />
+
+            {/* Future Employer Routes will go here */}
+            {/* <Route path="manage-jobs" element={<ManageJobs />} /> */}
+            {/* <Route path="applicants" element={<Applicants />} /> */}
           </Route>
         </Route>
       </Routes>

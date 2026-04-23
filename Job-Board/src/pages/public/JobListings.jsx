@@ -1,204 +1,143 @@
+import { useState, useEffect } from "react";
 import { Search, MapPin, Filter } from "lucide-react";
-import JobCard from "../../components/jobs/JobCard.jsx";
-
-const mockJobs = [
-  {
-    id: 1,
-    title: "Senior Frontend Engineer",
-    company: "Stripe",
-    location: "Remote, US",
-    salary: "$140k - $180k",
-    type: "Full-time",
-    level: "Senior",
-    postedAt: "2 days ago",
-    featured: true,
-  },
-  {
-    id: 2,
-    title: "Product Designer",
-    company: "Airbnb",
-    location: "San Francisco, CA",
-    salary: "$120k - $150k",
-    type: "Contract",
-    level: "Mid-Level",
-    postedAt: "5 hours ago",
-    featured: false,
-  },
-  {
-    id: 3,
-    title: "Backend Developer (Go)",
-    company: "Uber",
-    location: "New York, NY",
-    salary: "$130k - $160k",
-    type: "Full-time",
-    level: "Mid-Level",
-    postedAt: "1 day ago",
-    featured: false,
-  },
-  {
-    id: 4,
-    title: "Growth Marketing Manager",
-    company: "Notion",
-    location: "Remote",
-    salary: "$90k - $120k",
-    type: "Full-time",
-    level: "Mid-Level",
-    postedAt: "3 days ago",
-    featured: false,
-  },
-];
+import JobCard from "../../components/jobs/JobCard";
+import { fetchJobs } from "../../firebase/jobServices";
 
 const JobListings = () => {
+  const [jobs, setJobs] = useState([]);
+  const [filteredJobs, setFilteredJobs] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // Search States
+  const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedTerm, setDebouncedTerm] = useState("");
+
+  // 1. Initial Data Load
+  useEffect(() => {
+    const loadJobs = async () => {
+      setLoading(true);
+      const data = await fetchJobs();
+      setJobs(data);
+      setFilteredJobs(data);
+      setLoading(false);
+    };
+    loadJobs();
+  }, []);
+
+  // 2. The Debounce Engine (Waits 500ms after user stops typing to trigger search)
+  useEffect(() => {
+    const timerId = setTimeout(() => {
+      setDebouncedTerm(searchTerm);
+    }, 500);
+
+    return () => clearTimeout(timerId); // Cleanup if user types again before 500ms
+  }, [searchTerm]);
+
+  // 3. The Filter Logic (Runs only when debounced term changes)
+  useEffect(() => {
+    if (!debouncedTerm.trim()) {
+      setFilteredJobs(jobs);
+      return;
+    }
+
+    const lowerCaseSearch = debouncedTerm.toLowerCase();
+    const results = jobs.filter(
+      (job) =>
+        job.title.toLowerCase().includes(lowerCaseSearch) ||
+        job.companyName.toLowerCase().includes(lowerCaseSearch) ||
+        job.tags?.some((tag) => tag.toLowerCase().includes(lowerCaseSearch)),
+    );
+
+    setFilteredJobs(results);
+  }, [debouncedTerm, jobs]);
+
   return (
-    <div className="find-jobs-wrapper">
-      {/* Header Section */}
-      <div className="find-jobs-header">
+    <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "2rem" }}>
+      <div style={{ textAlign: "center", marginBottom: "3rem" }}>
         <h1
           style={{
-            fontSize: "2.25rem",
+            fontSize: "2.5rem",
             fontWeight: "800",
-            marginBottom: "1.5rem",
+            color: "#0f172a",
+            marginBottom: "1rem",
           }}
         >
-          Find Your Next Great Opportunity
+          Find your next role.
         </h1>
-
-        <div className="search-box">
-          <div className="search-input-group">
-            <Search size={20} />
-            <input
-              type="text"
-              placeholder="Job title or keyword"
-              className="search-input"
-            />
-          </div>
-          <div className="search-input-group">
-            <MapPin size={20} />
-            <input
-              type="text"
-              placeholder="City, state, or remote"
-              className="search-input"
-            />
-          </div>
-          <button className="btn-primary search-submit-btn">Search</button>
-        </div>
+        <p style={{ color: "#64748b", fontSize: "1.1rem" }}>
+          Explore {jobs.length} open opportunities across the globe.
+        </p>
       </div>
 
-      {/* Main Structural Grid */}
-      <div className="find-jobs-grid">
-        {/* The Index: Sticky Filter Panel */}
-        <aside className="filter-panel">
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              marginBottom: "1.5rem",
-            }}
+      {/* The Search Bar UI */}
+      <div className="search-box" style={{ marginBottom: "3rem" }}>
+        <div className="search-input-group">
+          <Search size={20} />
+          <input
+            type="text"
+            className="search-input"
+            placeholder="Job title, keyword, or company..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+        <div className="search-input-group">
+          <MapPin size={20} />
+          <input
+            type="text"
+            className="search-input"
+            placeholder="City, state, or remote"
+          />
+        </div>
+        <button className="btn-primary search-submit-btn">Search Roles</button>
+      </div>
+
+      {/* Empty State vs Results */}
+      {loading ? (
+        <div style={{ textAlign: "center", padding: "4rem", color: "#64748b" }}>
+          Loading opportunities...
+        </div>
+      ) : filteredJobs.length === 0 ? (
+        <div
+          style={{
+            textAlign: "center",
+            padding: "4rem",
+            backgroundColor: "#f8fafc",
+            borderRadius: "16px",
+            border: "1px dashed #cbd5e1",
+          }}
+        >
+          <Filter size={48} color="#94a3b8" style={{ margin: "0 auto 1rem" }} />
+          <h3
+            style={{ fontSize: "1.25rem", fontWeight: "600", color: "#0f172a" }}
           >
-            <h2
-              style={{
-                fontSize: "1.1rem",
-                fontWeight: "800",
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-              }}
-            >
-              <Filter size={18} /> Filters
-            </h2>
-            <button
-              style={{
-                background: "none",
-                color: "#2563eb",
-                fontSize: "0.85rem",
-                fontWeight: "600",
-              }}
-            >
-              Clear all
-            </button>
-          </div>
-
-          <div className="filter-group">
-            <h3 className="filter-heading">Job Type</h3>
-            {["Full-time", "Part-time", "Contract", "Internship"].map(
-              (type) => (
-                <label key={type} className="filter-option">
-                  <input
-                    type="checkbox"
-                    style={{
-                      width: "16px",
-                      height: "16px",
-                      accentColor: "#2563eb",
-                    }}
-                  />
-                  <span>{type}</span>
-                </label>
-              ),
-            )}
-          </div>
-
-          <div className="filter-group">
-            <h3 className="filter-heading">Experience Level</h3>
-            {["Entry Level", "Mid-Level", "Senior", "Director"].map((level) => (
-              <label key={level} className="filter-option">
-                <input
-                  type="checkbox"
-                  style={{
-                    width: "16px",
-                    height: "16px",
-                    accentColor: "#2563eb",
-                  }}
-                />
-                <span>{level}</span>
-              </label>
-            ))}
-          </div>
-        </aside>
-
-        {/* The Archive: Job Feed */}
-        <div className="job-feed">
-          <div className="feed-controls">
-            <span style={{ fontSize: "0.9rem", color: "#64748b" }}>
-              Showing <strong style={{ color: "#0f172a" }}>432</strong> jobs
-            </span>
-            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-              <span style={{ fontSize: "0.85rem", color: "#64748b" }}>
-                Sort by:
-              </span>
-              <select
-                style={{
-                  border: "none",
-                  background: "transparent",
-                  fontWeight: "600",
-                  color: "#0f172a",
-                  outline: "none",
-                }}
-              >
-                <option>Most Relevant</option>
-                <option>Newest Postings</option>
-                <option>Highest Salary</option>
-              </select>
-            </div>
-          </div>
-
-          {/* Render the structural support units (Job Cards) */}
-          {mockJobs.map((job) => (
-            <JobCard key={job.id} job={job} />
-          ))}
-
+            No matching jobs found
+          </h3>
+          <p style={{ color: "#64748b", marginTop: "0.5rem" }}>
+            Try adjusting your keywords or clearing your filters.
+          </p>
           <button
-            className="btn-primary"
+            onClick={() => setSearchTerm("")}
             style={{
-              backgroundColor: "white",
-              color: "#0f172a",
-              border: "1px solid #e2e8f0",
               marginTop: "1rem",
+              padding: "0.5rem 1rem",
+              background: "#e2e8f0",
+              border: "none",
+              borderRadius: "6px",
+              cursor: "pointer",
+              fontWeight: "500",
             }}
           >
-            Load More Jobs
+            Clear Search
           </button>
         </div>
-      </div>
+      ) : (
+        <div className="job-grid">
+          {filteredJobs.map((job) => (
+            <JobCard key={job.id} job={job} />
+          ))}
+        </div>
+      )}
     </div>
   );
 };
